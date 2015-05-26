@@ -1,5 +1,5 @@
-DROP TABLE tmp_exchangelab;
-CREATE TABLE tmp_exchangelab AS
+DROP TABLE tmp_cafemom;
+CREATE TABLE tmp_cafemom AS
 SELECT
   id,
   ts,
@@ -15,9 +15,9 @@ SELECT
 FROM ads_raw
 WHERE
   DATE_TRUNC('week', ts + INTERVAL '1 day') in (DATE_TRUNC('week', GETDATE() - INTERVAL '6 day'), DATE_TRUNC('week', GETDATE() - INTERVAL '13 day'))
-  AND cli_id = '72c59a1bacc7752e71dd74fe8dcc4fbd28fdbc33' -- exchangelab
+  AND cli_id = '86599460ea5a4d508ecaa22e927db2133ee9e720' -- cafemom
 ;
-ALTER TABLE tmp_exchangelab ADD COLUMN reason varchar(100);
+ALTER TABLE tmp_cafemom ADD COLUMN reason varchar(100);
 
 -- SUPPLIER SUMMARY
 SELECT
@@ -28,8 +28,9 @@ SELECT
 ((SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float) / MAX(total_imps) - (SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END)::float) / MAX(total_imps_old)) "Change in Percent",
   SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) "MEASURED",
 ((((SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) - SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END))::float) / (NULLIF(SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END),0))::float)) "Percent Change",
-  SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float / SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) "PCT",
-(SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float / SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)) - (SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END)::float / NULLIF(SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END),0)) "Change in Percent",
+  SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float / NULLIF(SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END),0) "PCT",
+--(SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float / SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)) - (SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END)::float / NULLIF(SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END),0)) "Change in Percent",
+(SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)::float / NULLIF((SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END)),0)) - (SUM(CASE WHEN meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END)::float / NULLIF(SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END),0)) "Change in Percent",
 	SUM(CASE WHEN xhost_match IS TRUE AND meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) "MATCHED",
 (SUM(CASE WHEN xhost_match IS TRUE AND meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) - SUM(CASE WHEN xhost_match IS TRUE AND meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END)::float) / NULLIF(SUM(CASE WHEN xhost_match IS TRUE AND meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END),0) "PERCENT CHANGE",
 	SUM(CASE WHEN xhost_match IS NOT TRUE AND meas_state = 'measured' AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) "MISMATCHED",
@@ -58,7 +59,7 @@ FROM (
 		ts,
     SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day') THEN 1 ELSE 0 END) OVER () total_imps,
 		SUM(CASE WHEN DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '13 day') THEN 1 ELSE 0 END) OVER () total_imps_old
-  FROM tmp_exchangelab
+  FROM tmp_cafemom
 )
 GROUP BY 1
 ORDER BY "TOTAL" DESC
@@ -93,7 +94,7 @@ FROM (
 		ts,
     COUNT(*) OVER (PARTITION BY xurl_domain) domain_imps,
     COUNT(*) OVER () total_imps
-  FROM tmp_exchangelab
+  FROM tmp_cafemom
 	--WHERE DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day')
 )
 WHERE DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day')
@@ -128,7 +129,7 @@ FROM (
 		ts,
     COUNT(*) OVER (PARTITION BY domain_est) domain_imps,
     COUNT(*) OVER () total_imps
-  FROM tmp_exchangelab
+  FROM tmp_cafemom
   WHERE meas_state = 'measured'
 	--AND DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day')
 )
@@ -138,7 +139,7 @@ ORDER BY "TOTAL" DESC
 ;
 
 -- SUPPLIER DOMAIN MISMATCH
-UPDATE tmp_exchangelab
+UPDATE tmp_cafemom
 SET reason = (
   SELECT r.reason
   FROM reasons r
@@ -160,7 +161,7 @@ SELECT
   reason "REASON",
   COUNT(*) "MISMATCH TOTAL"
 FROM
-  tmp_exchangelab
+  tmp_cafemom
 WHERE
   meas_state = 'measured'
   AND xhost_match IS FALSE
@@ -185,8 +186,8 @@ SELECT
   SUM(CASE WHEN ad_recyc = 0 AND has_page_tree IS TRUE THEN 1 ELSE 0 END) "FIRST LOOK",
   SUM(CASE WHEN ad_recyc > 0 AND has_page_tree IS TRUE THEN 1 ELSE 0 END) "RECYCLED",
   SUM(CASE WHEN ad_recyc > 0 AND has_page_tree IS TRUE THEN 1 ELSE 0 END)::float / NULLIF(SUM(CASE WHEN has_page_tree IS TRUE THEN 1 ELSE 0 END),0) "PCT"
-FROM tmp_exchangelab
+FROM tmp_cafemom
 WHERE DATE_TRUNC('week', ts + INTERVAL '1 day') = DATE_TRUNC('week', GETDATE() - INTERVAL '6 day')
 GROUP BY 1
 ORDER BY "DATE" DESC
-;d
+;
