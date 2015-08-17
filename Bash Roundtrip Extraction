@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# Function parses through all Ls data and returns the roundtrip time data for files within the last 30 days with a size greater than or equal to 10000
+
+OUTPUT="$(aws s3 ls s3://ad-export/archive/all/)" #Assign all ls data to OUTPUT variable
+x=1      # Initialize x value to 1
+args1=() # Initialize timestamp array
+args2=() # Initialize size array
+args3=() # Initialize file name array
+args4=() # Intialize date array
+index=() # Index for when date is equal to the searched value and the size is greater than or equal to 10000 array
+minus=() # Time difference between the start date and end date array
+start=() # Start time with date array
+end=()   # End time with date array
+size=()
+for file in $OUTPUT # Loop through all 4 elements of a single ls Output
+do
+        if [ $x -eq 1 ]; then # Extract the first element from Output
+        args1+=("${file}") # Append that element to the timestamp array
+        x=2 # Re-assign value of x to two so that next element will be sent to second array
+        continue; # Continue with the for loop (ignore other if statements)
+        fi # end conditional statement
+        if [ $x -eq 2 ]; then # See above
+        args2+=("${file}")
+        x=3
+        continue;
+        fi
+        if [ $x -eq 3 ]; then
+        args3+=("${file}")
+        x=4
+        continue;
+        fi
+        if [ $x -eq 4 ]; then
+        args4+=("${file}")
+        x=1
+        continue;
+        fi
+
+done
+
+args4=("${args4[@]:1}") # Delete first element from the date array (garbage value)
+args3=("${args3[@]:2}") # Delete first and second element from the timestamp array
+args2=("${args2[@]:2}") # See above
+args1=("${args1[@]:2}")
+
+
+DATE0=`date +%Y-%m-%d` # Initialize Date to todays date
+for o in {1..30} # start for loop to iterate for the previous 30 days
+do
+
+	r=0 # initialize r to 0
+	for i in "${args4[@]}"
+	do
+        	if [ $i == "$DATE0" ] ; then # check to see if date array is equal to the appropriate date required
+        	if [ "${args2[$r]}" -ge 10000 ] ; then # Check if size is greater or equal to 10000 only meaningful files are desired
+        	index+=($r) # Append the value of each of index where it satifies above requirements from the total
+        	size+=("${args2[$r]}") # Save the sizes of the files that have a size greater or equal to 10000
+        	fi
+        	fi
+		r=$(( $r+1 )) # Iterate r by 1 everytime the loop is run
+
+	done
+
+	u=0
+  	for w in "${index[@]}" # for every value that satisfies the date and size paramater
+	do
+        	sub1=(${args3[$w]:(-17):8}) # Substring the date from the file name starting from the back
+        	sub2=(${args3[$w]:(-9):2}) # Substring the time from the file name starting from the back
+		foo="$sub1 $sub2" # concatenate the file name date and the file name time into the foo temporary variable
+		start1=$(date -d "$foo") # convert the concatenated date and time into a UTC date using the date function
+		start+=("$start1") # Append this file name date in the start array
+		time0="${args4[$w]} ${args1[$w]}" # concatenate the date and time from the two arrays with the indecies that statisfies the date and size requirements
+		end1=$(date -d "$time0") # convert these dates and times to a UTC date using the date function
+		end+=("$end1") # append  this UTC date in the end array
+	done
+
+	y=0
+	for a in "${index[@]}"
+	do
+        	minus1=$(( ( $(date -ud "${end[$y]}" +'%s') - $(date -ud "${start[$y]}" +'%s') ) )) # Calculate the time difference in seconds
+        	minus+=($minus1) # append the time difference in seconds in the minus array
+        	echo ${args4[$a]},${args1[$a]},${args3[$a]},${start[$y]},${end[$y]},${minus[$y]},${size[$y]} # Print the date, time, filename, starting UTC date and time, END $
+	y=$(( $y+1 )) # iterate over y everytime the loop is run
+	done
+
+	DATE0=$(date --date=""$o" days ago" +"%Y-%m-%d") # Convert date to the previous date after all information for this date has been found
+	index=() # Delete all index information, so new day can show only its information
+	start=() # See above
+	end=()
+	minus=()
+	size=()
+done
