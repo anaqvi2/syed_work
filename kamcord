@@ -10,6 +10,7 @@ class kamcord:
         user_only= (all_range[['user_id']]).drop_duplicates()  
         all_range['event_time']=pd.to_datetime(all_range['event_time']).apply(lambda x: x.date()) 
         all_range=(all_range[["user_id", "os_name", "sdk_version", "event_time"]]).drop_duplicates() 
+        
         temp = pd.read_csv('data.csv', iterator=True, chunksize=1000)
         self.all=pd.DataFrame(pd.concat([chunk[chunk['user_id'].isin(user_only['user_id']) & (chunk['event_time'] < (datetime.datetime.strptime(end_date, "%Y-%m-%d")+datetime.timedelta(days=1)).strftime('%Y-%m-%d')) & (chunk['event_name']=="UI_OPEN_COUNT")] for chunk in temp]).groupby("user_id").aggregate(min)['event_time']).reset_index()
         self.all['start_date']=pd.to_datetime(self.all['event_time']).apply(lambda x: x.date())
