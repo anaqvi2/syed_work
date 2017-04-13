@@ -1,0 +1,1080 @@
+{
+  "paragraphs": [
+    {
+      "text": "import com.datastax.spark.connector._\nimport com.datastax.spark.connector.cql._\nimport org.apache.spark.SparkContext",
+      "dateUpdated": "Oct 7, 2016 5:49:02 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536465_-865645471",
+      "id": "20160928-164902_1988955397",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "import com.datastax.spark.connector._\nimport com.datastax.spark.connector.cql._\nimport org.apache.spark.SparkContext\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "dateStarted": "Oct 7, 2016 5:49:02 PM",
+      "dateFinished": "Oct 7, 2016 5:49:03 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "// load news\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"ds\", \"disease\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\", \"product\", \"organization\", \"impact\")\n  .withColumn(\"source\", lit(\"news\"))\n\nvar df2 \u003d df.filter($\"cr\" \u003e\u003d \"2016-01-01\")\ndf2 \u003d df2.filter(array_contains(df(\"disease\"), 26696) || array_contains(df(\"product\"), 1012))\n\n// load twitter\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"twitter\", \"keyspace\" -\u003e \"processed_social\"))\n  .load()\n  .select(\"id\", \"ds\",\"disease\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\", \"product\", \"organization\",\"klout\")\n  .withColumnRenamed(\"klout\", \"impact\")\n  .withColumn(\"source\", lit(\"twitter\"))\n\ndf \u003d df.filter($\"cr\" \u003e\u003d \"2016-01-01\")\ndf \u003d df.filter(array_contains(df(\"disease\"), 26696) || array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)\n\n// load reddit\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"reddit\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"ds\", \"disease\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\", \"product\", \"organization\", \"ups\")\n  .withColumnRenamed(\"ups\", \"impact\")\n  .withColumn(\"source\", lit(\"reddit\"))\n\ndf \u003d df.filter($\"cr\" \u003e\u003d \"2016-01-01\")\ndf \u003d df.filter(array_contains(df(\"disease\"), 26696) || array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)\n\n// load forum\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"forum\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"ds\", \"disease\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\", \"product\", \"organization\", \"ups\")\n  .withColumnRenamed(\"ups\", \"impact\")\n  .withColumn(\"source\", lit(\"forum\"))\n  \ndf \u003d df.filter($\"cr\" \u003e\u003d \"2016-01-01\")\ndf \u003d df.filter(array_contains(df(\"disease\"), 26696) || array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)",
+      "dateUpdated": "Oct 7, 2016 7:30:55 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": false,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536465_-865645471",
+      "id": "20160928-164925_149591937",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "dateStarted": "Oct 7, 2016 7:30:07 PM",
+      "dateFinished": "Oct 7, 2016 7:30:20 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.show()",
+      "dateUpdated": "Oct 7, 2016 7:31:29 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": false,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20161004-022458_556989548",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+---------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\n|                  id|       ds|             disease|                 url|         description|               title|sentiment|          place_list|                  cr| product|organization|impact|source|\n+--------------------+---------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\n|             4133654|HealthMap|  [26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|      []|          []|     0|  news|\n|             4133778|HealthMap|           [26696.0]|http://www.plengl...|Bolivia Reports I...|Bolivia Reports I...|       -1|[[null,5,Bolivia,...|2016-04-01 16:43:...|      []|          []|     0|  news|\n|             4136989|HealthMap|  [26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|      []|          []|     0|  news|\n|             4216033|HealthMap|           [26696.0]|http://atarde.uol...|\u003ctable border\u003d\"0\"...|Pesquisa de brasi...|       -1|[[null,6,Brazil,-...|2016-05-11 16:00:...|      []|          []|     0|  news|\n|http://fortune.co...|   scrapy|           [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|      []|          []|     0|  news|\n|http://fortune.co...|   scrapy|           [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|      []|          []|     0|  news|\n|             3925463|HealthMap|[25710.0, 26696.0...|http://boletinald...|La responsable de...|Identifican cómo ...|       -1|[[3177337.0,null,...|2016-01-11 01:06:...|      []|          []|  null|  news|\n|             4115666|HealthMap|           [26696.0]|http://www.eurasi...|Zika Virus And Mi...|Zika Virus And Mi...|       -1|[[null,6,Brazil,-...|2016-03-24 02:10:...|[1722.0]|          []|     0|  news|\n|             4115747|HealthMap|           [26696.0]|http://www.lanaci...|\u003ctable border\u003d\"0\"...|Dengue: estiman q...|       -1|[[null,4,Argentin...|2016-03-24 02:03:...|      []|          []|     0|  news|\n|             4171344|HealthMap|[25710.0, 26696.0...|http://boletinald...|¿Cómo es posible ...|Aclarando la intr...|       -1|[[3686120.0,null,...|2016-04-20 02:05:...|      []|          []|  null|  news|\n|http://www.review...|   scrapy|           [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|      []|          []|     5|  news|\n|http://www.review...|   scrapy|           [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|      []|          []|     5|  news|\n|             4316891|HealthMap|           [26696.0]|http://news-russi...|\u003ctable border\u003d\"0\"...|Новая вакцина изл...|        1|[[2755476.0,null,...|2016-06-29 11:54:...|      []|          []|  null|  news|\n|             4204525|HealthMap|  [26696.0, 25520.0]|http://www.cdc.go...|      No description|Update: Ongoing Z...|       -1|[[null,192,Puerto...|2016-05-05 15:07:...|      []|          []|     0|  news|\n|             4205395|HealthMap|           [26696.0]|http://www.abc.co...|\u003ctable border\u003d\"0\"...|Suman 16 muertes ...|       -1|[[null,9,Paraguay...|2016-05-05 23:19:...|      []|          []|     0|  news|\n|             4209460|HealthMap|           [26696.0]|http://antiguaobs...|Health minister s...|Health minister s...|        1|[[null,30,Antigua...|2016-05-05 05:00:...|      []|          []|     0|  news|\n|             4361557|HealthMap|           [26696.0]|http://www.infoba...|\u003ctable border\u003d\"0\"...|Identificaron un ...|        0|[[3390760.0,null,...|2016-07-21 20:09:...|      []|          []|  null|  news|\n|             4361687|HealthMap|           [26696.0]|http://newsera.ru...|\u003ctable border\u003d\"0\"...|В Мексике резко в...|        1|                  []|2016-07-21 20:25:...|      []|          []|  null|  news|\n|http://www.laraza...|   scrapy|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|      []|          []|     0|  news|\n|http://www.laraza...|   scrapy|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|      []|          []|  null|  news|\n+--------------------+---------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "dateStarted": "Oct 7, 2016 7:31:09 PM",
+      "dateFinished": "Oct 7, 2016 7:31:21 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.filter(\"impact is not null\").show()",
+      "dateUpdated": "Oct 7, 2016 7:33:00 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0,
+        "tableHide": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20160929-192117_1017119892",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+---------+------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\n|                  id|       ds|           disease|                 url|         description|               title|sentiment|          place_list|                  cr| product|organization|impact|source|\n+--------------------+---------+------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\n|             4133654|HealthMap|[26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|      []|          []|     0|  news|\n|             4133778|HealthMap|         [26696.0]|http://www.plengl...|Bolivia Reports I...|Bolivia Reports I...|       -1|[[null,5,Bolivia,...|2016-04-01 16:43:...|      []|          []|     0|  news|\n|             4136989|HealthMap|[26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|      []|          []|     0|  news|\n|             4216033|HealthMap|         [26696.0]|http://atarde.uol...|\u003ctable border\u003d\"0\"...|Pesquisa de brasi...|       -1|[[null,6,Brazil,-...|2016-05-11 16:00:...|      []|          []|     0|  news|\n|http://fortune.co...|   scrapy|         [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|      []|          []|     0|  news|\n|http://fortune.co...|   scrapy|         [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|      []|          []|     0|  news|\n|             4115666|HealthMap|         [26696.0]|http://www.eurasi...|Zika Virus And Mi...|Zika Virus And Mi...|       -1|[[null,6,Brazil,-...|2016-03-24 02:10:...|[1722.0]|          []|     0|  news|\n|             4115747|HealthMap|         [26696.0]|http://www.lanaci...|\u003ctable border\u003d\"0\"...|Dengue: estiman q...|       -1|[[null,4,Argentin...|2016-03-24 02:03:...|      []|          []|     0|  news|\n|http://www.review...|   scrapy|         [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|      []|          []|     5|  news|\n|http://www.review...|   scrapy|         [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|      []|          []|     5|  news|\n|             4204525|HealthMap|[26696.0, 25520.0]|http://www.cdc.go...|      No description|Update: Ongoing Z...|       -1|[[null,192,Puerto...|2016-05-05 15:07:...|      []|          []|     0|  news|\n|             4205395|HealthMap|         [26696.0]|http://www.abc.co...|\u003ctable border\u003d\"0\"...|Suman 16 muertes ...|       -1|[[null,9,Paraguay...|2016-05-05 23:19:...|      []|          []|     0|  news|\n|             4209460|HealthMap|         [26696.0]|http://antiguaobs...|Health minister s...|Health minister s...|        1|[[null,30,Antigua...|2016-05-05 05:00:...|      []|          []|     0|  news|\n|http://www.laraza...|   scrapy|         [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|      []|          []|     0|  news|\n|             4292797|HealthMap|         [26696.0]|http://www.todayo...|Bill Gates says a...|Bill Gates says a...|        1|[[null,253,Boston...|2016-06-17 00:20:...|      []|          []|     0|  news|\n|             4293138|HealthMap|[26696.0, 24841.0]|http://www.invs.s...|\u003ca name\u003d\"eztoc452...|Surveillance épid...|        0|[[null,35346,Pays...|2016-06-17 05:13:...|      []|          []|     0|  news|\n|             4293260|HealthMap|         [26696.0]|http://www.canalr...|\u003ctable border\u003d\"0\"...|Combate \u0026agrave; ...|        0|[[null,null,null,...|2016-06-17 06:50:...|      []|          []|     0|  news|\n|             4293542|HealthMap|[26696.0, 23641.0]|http://www.lse.co...|REFILE-UPDATE 1-W...|REFILE-UPDATE 1-W...|       -1|[[null,194,DR Con...|2016-06-17 08:07:...|[1722.0]|          []|     0|  news|\n|             4293622|HealthMap|         [26696.0]|http://exame.abri...|\u003ctable border\u003d\"0\"...|OMS pede US$ 121 ...|        0|[[null,9545,Alago...|2016-06-17 08:02:...|      []|          []|     0|  news|\n|             4293640|HealthMap|         [26696.0]|http://www.channe...|WHO says 122 mill...|WHO says 122 mill...|       -1|[[null,105,Switze...|2016-06-17 07:45:...|[1722.0]|          []|     0|  news|\n+--------------------+---------+------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+--------+------------+------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "dateStarted": "Oct 7, 2016 7:32:10 PM",
+      "dateFinished": "Oct 7, 2016 7:32:21 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df3 \u003d df2.filter($\"cr\" \u003e \"2016-06-01\" \u0026\u0026 $\"cr\" \u003c \"2016-09-01\")",
+      "dateUpdated": "Oct 7, 2016 7:56:26 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20160928-165121_1339282674",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df3: org.apache.spark.sql.DataFrame \u003d [id: string, ds: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, product: array\u003cdouble\u003e, organization: array\u003cdouble\u003e, impact: int, source: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "dateStarted": "Oct 7, 2016 7:56:26 PM",
+      "dateFinished": "Oct 7, 2016 7:56:26 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475870434179_845221732",
+      "id": "20161007-200034_942519651",
+      "dateCreated": "Oct 7, 2016 8:00:34 PM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df3.count()",
+      "dateUpdated": "Oct 7, 2016 8:00:39 PM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475870180355_-576008412",
+      "id": "20161007-195620_406237477",
+      "result": {
+        "code": "ERROR",
+        "type": "TEXT",
+        "msg": "org.apache.spark.SparkException: Job 136 cancelled part of cancelled job group zeppelin-20161007-195620_406237477\n\tat org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1431)\n\tat org.apache.spark.scheduler.DAGScheduler.handleJobCancellation(DAGScheduler.scala:1370)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleJobGroupCancelled$1.apply$mcVI$sp(DAGScheduler.scala:783)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleJobGroupCancelled$1.apply(DAGScheduler.scala:783)\n\tat org.apache.spark.scheduler.DAGScheduler$$anonfun$handleJobGroupCancelled$1.apply(DAGScheduler.scala:783)\n\tat scala.collection.mutable.HashSet.foreach(HashSet.scala:79)\n\tat org.apache.spark.scheduler.DAGScheduler.handleJobGroupCancelled(DAGScheduler.scala:783)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:1619)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1599)\n\tat org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:1588)\n\tat org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:48)\n\tat org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:620)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1832)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1845)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1858)\n\tat org.apache.spark.SparkContext.runJob(SparkContext.scala:1929)\n\tat org.apache.spark.rdd.RDD$$anonfun$collect$1.apply(RDD.scala:927)\n\tat org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:150)\n\tat org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:111)\n\tat org.apache.spark.rdd.RDD.withScope(RDD.scala:316)\n\tat org.apache.spark.rdd.RDD.collect(RDD.scala:926)\n\tat org.apache.spark.sql.execution.SparkPlan.executeCollect(SparkPlan.scala:166)\n\tat org.apache.spark.sql.execution.SparkPlan.executeCollectPublic(SparkPlan.scala:174)\n\tat org.apache.spark.sql.DataFrame$$anonfun$org$apache$spark$sql$DataFrame$$execute$1$1.apply(DataFrame.scala:1499)\n\tat org.apache.spark.sql.DataFrame$$anonfun$org$apache$spark$sql$DataFrame$$execute$1$1.apply(DataFrame.scala:1499)\n\tat org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:56)\n\tat org.apache.spark.sql.DataFrame.withNewExecutionId(DataFrame.scala:2086)\n\tat org.apache.spark.sql.DataFrame.org$apache$spark$sql$DataFrame$$execute$1(DataFrame.scala:1498)\n\tat org.apache.spark.sql.DataFrame.org$apache$spark$sql$DataFrame$$collect(DataFrame.scala:1505)\n\tat org.apache.spark.sql.DataFrame$$anonfun$count$1.apply(DataFrame.scala:1515)\n\tat org.apache.spark.sql.DataFrame$$anonfun$count$1.apply(DataFrame.scala:1514)\n\tat org.apache.spark.sql.DataFrame.withCallback(DataFrame.scala:2099)\n\tat org.apache.spark.sql.DataFrame.count(DataFrame.scala:1514)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$725d9ae18728ec9520b65ad133e3b55$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:110)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$3d99ae6e19b65c7f617b22f29b431fb$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:115)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$3d99ae6e19b65c7f617b22f29b431fb$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:117)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$3d99ae6e19b65c7f617b22f29b431fb$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:119)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$3d99ae6e19b65c7f617b22f29b431fb$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:121)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$3d99ae6e19b65c7f617b22f29b431fb$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:123)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$ad149dbdbd963d0c9dc9b1d6f07f5e$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:125)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$ad149dbdbd963d0c9dc9b1d6f07f5e$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:127)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$ad149dbdbd963d0c9dc9b1d6f07f5e$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:129)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$ad149dbdbd963d0c9dc9b1d6f07f5e$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:131)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$ad149dbdbd963d0c9dc9b1d6f07f5e$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:133)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$6e49527b15a75f3b188beeb1837a4f1$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:135)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$6e49527b15a75f3b188beeb1837a4f1$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:137)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$6e49527b15a75f3b188beeb1837a4f1$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:139)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$6e49527b15a75f3b188beeb1837a4f1$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:141)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$6e49527b15a75f3b188beeb1837a4f1$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:143)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$93297bcd59dca476dd569cf51abed168$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:145)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$93297bcd59dca476dd569cf51abed168$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:147)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$93297bcd59dca476dd569cf51abed168$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:149)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$93297bcd59dca476dd569cf51abed168$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:151)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$$$93297bcd59dca476dd569cf51abed168$$$$$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:153)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:155)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:157)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:159)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:161)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:163)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:165)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:167)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:169)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:171)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:173)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:175)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:177)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:179)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:181)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:183)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:185)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:187)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:189)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:191)\n\tat $iwC$$iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:193)\n\tat $iwC$$iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:195)\n\tat $iwC$$iwC.\u003cinit\u003e(\u003cconsole\u003e:197)\n\tat $iwC.\u003cinit\u003e(\u003cconsole\u003e:199)\n\tat \u003cinit\u003e(\u003cconsole\u003e:201)\n\tat .\u003cinit\u003e(\u003cconsole\u003e:205)\n\tat .\u003cclinit\u003e(\u003cconsole\u003e)\n\tat .\u003cinit\u003e(\u003cconsole\u003e:7)\n\tat .\u003cclinit\u003e(\u003cconsole\u003e)\n\tat $print(\u003cconsole\u003e)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:606)\n\tat org.apache.spark.repl.SparkIMain$ReadEvalPrint.call(SparkIMain.scala:1065)\n\tat org.apache.spark.repl.SparkIMain$Request.loadAndRun(SparkIMain.scala:1346)\n\tat org.apache.spark.repl.SparkIMain.loadAndRunReq$1(SparkIMain.scala:840)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:871)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:819)\n\tat org.apache.zeppelin.spark.SparkInterpreter.interpretInput(SparkInterpreter.java:810)\n\tat org.apache.zeppelin.spark.SparkInterpreter.interpret(SparkInterpreter.java:753)\n\tat org.apache.zeppelin.spark.SparkInterpreter.interpret(SparkInterpreter.java:746)\n\tat org.apache.zeppelin.interpreter.LazyOpenInterpreter.interpret(LazyOpenInterpreter.java:94)\n\tat org.apache.zeppelin.interpreter.remote.RemoteInterpreterServer$InterpretJob.jobRun(RemoteInterpreterServer.java:341)\n\tat org.apache.zeppelin.scheduler.Job.run(Job.java:176)\n\tat org.apache.zeppelin.scheduler.FIFOScheduler$1.run(FIFOScheduler.java:139)\n\tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:471)\n\tat java.util.concurrent.FutureTask.run(FutureTask.java:262)\n\tat java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$201(ScheduledThreadPoolExecutor.java:178)\n\tat java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:292)\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)\n\tat java.lang.Thread.run(Thread.java:745)\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 7:56:20 PM",
+      "dateStarted": "Oct 7, 2016 7:56:28 PM",
+      "dateFinished": "Oct 7, 2016 8:00:37 PM",
+      "status": "ABORT",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.write\n  .format(\"org.apache.spark.sql.cassandra\")\n  .mode(\"append\")\n  .options(Map( \"table\" -\u003e \"disease_agg_table\", \"keyspace\" -\u003e \"testing\"))\n  .save()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20160928-172102_1505390304",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df2 \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"forum\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"disease\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\")",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20160928-172906_52190096",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df2: org.apache.spark.sql.DataFrame \u003d [id: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536466_-864491224",
+      "id": "20160928-180045_1626396525",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+\n|                  id|             disease|                 url|         description|               title|sentiment|          place_list|                  cr|source|\n+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+\n|             4216033|           [26696.0]|http://atarde.uol...|\u003ctable border\u003d\"0\"...|Pesquisa de brasi...|       -1|[[null,6,Brazil,-...|2016-05-11 16:00:...|  news|\n|             3925463|[25710.0, 26696.0...|http://boletinald...|La responsable de...|Identifican cómo ...|       -1|[[null,496,Estado...|2016-01-11 01:06:...|  news|\n|             4171344|[25710.0, 26696.0...|http://boletinald...|¿Cómo es posible ...|Aclarando la intr...|       -1|[[null,5626,Asia,...|2016-04-20 02:05:...|  news|\n|             4204525|  [26696.0, 25520.0]|http://www.cdc.go...|      No description|Update: Ongoing Z...|       -1|[[null,192,Puerto...|2016-05-05 15:07:...|  news|\n|             4209460|           [26696.0]|http://antiguaobs...|Health minister s...|Health minister s...|        1|[[null,30,Antigua...|2016-05-05 05:00:...|  news|\n|http://www.laraza...|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|  news|\n|http://www.laraza...|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|  news|\n|             4151116|[25710.0, 26696.0...|http://boletinald...|Con 71 muertes en...|La gripe A se ant...|       -1|[[null,6,Brazil,-...|2016-04-11 02:05:...|  news|\n|             4171257|           [26696.0]|http://www.vangua...|\u003ctable border\u003d\"0\"...|Dengue, chikungu\u0026...|       -1|[[null,3054,Bucar...|2016-04-20 01:30:...|  news|\n|             4172233|           [26696.0]|http://www.vangua...|\u003ctable border\u003d\"0\"...|Dengue, chikungu\u0026...|       -1|[[null,3054,Bucar...|2016-04-20 01:30:...|  news|\n|             4174066|           [26696.0]|http://www.latime...|Caring for babies...|Caring for babies...|        0|[[null,6,Brazil,-...|2016-04-20 21:13:...|  news|\n|             4149459|           [26696.0]|http://www.lacron...|\u003ctable border\u003d\"0\"...|Virus de Zika no ...|        0|[[null,486,Estado...|2016-04-09 15:02:...|  news|\n|             4151876|[20035.0, 26696.0...|http://www.indepe...|Zika virus may be...|Zika virus may be...|       -1|[[null,6,Brazil,-...|2016-04-11 09:31:...|  news|\n|             4152669|  [20035.0, 26696.0]|http://www.eluniv...|\u003ctable border\u003d\"0\"...|Ligan nuevo trast...|       -1|[[null,4,Argentin...|2016-04-11 14:56:...|  news|\n|             4153932|  [20035.0, 26696.0]|http://promedmail...|Cientistas brasil...|PRO/PORT\u003e Zika ví...|       -1|[[null,6,Brazil,-...|2016-04-12 21:50:...|  news|\n|             4386881|[20594.0, 26696.0...|http://www.eweek....|IBM\u0026#39;s Lab-on-...|IBM\u0027s Lab-on-a-Ch...|        1|[[null,106,United...|2016-08-02 00:33:...|  news|\n|             3943031|           [26696.0]|http://promedmail...|                null|PRO/ESP\u003e Zika - E...|       -1|[[null,6,Brazil,-...|2016-01-17 00:57:...|  news|\n|             3943866|  [26696.0, 25312.0]|http://www.stirip...|\u003ctable border\u003d\"0\"...|Postarea anului f...|        0|[[null,null,null,...|2016-01-17 11:58:...|  news|\n|             3944604|           [26696.0]|http://www.andina...|\u003ctable border\u003d\"0\"...|Minsa cuenta con ...|       -1|[[null,10,Peru,-9...|2016-01-17 17:31:...|  news|\n|             4148818|           [26696.0]|http://www.pulseh...|7 things about Zi...|7 things about Zi...|        1|[[null,6,Brazil,-...|2016-04-08 21:04:...|  news|\n+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.groupBy(\"source\").count().show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20160928-180115_292929763",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+-------+-----+\n| source|count|\n+-------+-----+\n|twitter|  249|\n|  forum|    1|\n| reddit|    1|\n|   news| 4328|\n+-------+-----+\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.filter(array_contains(df2(\"disease\"), 1012)).count()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20160929-042708_995173864",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "res42: Long \u003d 0\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"organization\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"impact\", \"cr\")\n  .filter(size($\"organization\")\u003e0 \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\").filter(\"impact is not null\")\n  .withColumn(\"source\", lit(\"news\"))\n  \nvar df2 \u003d df\n\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"twitter\", \"keyspace\" -\u003e \"processed_social\"))\n  .load()\n  .select(\"id\", \"organization\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\",\"klout\", \"cr\")\n  .withColumnRenamed(\"klout\", \"impact\")\n  .filter(size($\"organization\")\u003e0 \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\")\n  .withColumn(\"source\", lit(\"twitter\"))\n\ndf2 \u003d df2.unionAll(df)\n\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"reddit\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"organization\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"score\", \"cr\")\n  .withColumnRenamed(\"score\", \"impact\")\n  .filter(size($\"organization\")\u003e0 \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\")\n  .withColumn(\"source\", lit(\"reddit\"))\n\ndf2 \u003d df2.unionAll(df)\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"forum\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"organization\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"score\", \"cr\")\n  .withColumnRenamed(\"score\", \"impact\")\n  .filter(size($\"organization\")\u003e0 \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\")\n  .withColumn(\"source\", lit(\"forum\"))\n\ndf2 \u003d df2.unionAll(df)",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": false,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20160929-043518_1091776033",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, impact: int, cr: timestamp, source: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20161004-035352_371531924",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+------------+--------------------+--------------------+--------------------+---------+--------------------+------+--------------------+------+\n|                  id|organization|                 url|         description|               title|sentiment|          place_list|impact|                  cr|source|\n+--------------------+------------+--------------------+--------------------+--------------------+---------+--------------------+------+--------------------+------+\n|             4132115|     [209.0]|http://finfeed.co...|Tech vision becom...|Tech vision becom...|        1|[[null,106,United...|     0|2016-04-01 01:00:...|  news|\n|             4132788|     [210.0]|http://www.wsnews...|What Price Target...|What Price Target...|        1|[[null,75,Italy,4...|     0|2016-04-01 08:41:...|  news|\n|             4215722|     [209.0]|https://www.sheph...|Jordan to acquire...|Jordan to acquire...|        0|[[null,91,Jordan,...|     0|2016-05-11 11:33:...|  news|\n|             4172907|     [210.0]|http://www.bizjou...|From Whirlpool to...|From Whirlpool to...|        1|[[null,null,null,...|     1|2016-04-20 15:30:...|  news|\n|             4173332|     [208.0]|http://www.freshb...|Better support fo...|Better support fo...|        1|[[null,40,United ...|     0|2016-04-20 19:02:...|  news|\n|http://www.nydail...|     [210.0]|http://www.nydail...|America\u0027s 50 bigg...|Top U.S. companie...|       -1|[[5128638.0,null,...|     0|2016-04-14 21:49:...|  news|\n|http://www.nydail...|     [210.0]|http://www.nydail...|America\u0027s 50 bigg...|Top U.S. companie...|       -1|[[5128638.0,null,...|     0|2016-04-14 21:49:...|  news|\n|             4203483|     [207.0]|https://www.finex...|Digital banking t...|Digital banking t...|        1|[[null,75,Italy,4...|     0|2016-05-05 06:19:...|  news|\n|http://www.dl-onl...|     [210.0]|http://www.dl-onl...|While they might ...|A computer that c...|        1|[[5037779.0,null,...|     0|2016-05-20 15:41:...|  news|\n|http://www.invest...|     [207.0]|http://www.invest...|Smart beta ETFs (...|Low Volatility ET...|        1|[[5332921.0,null,...|     0|2016-05-20 13:21:...|  news|\n|http://www.invest...|     [207.0]|http://www.invest...|Smart beta ETFs (...|Low Volatility ET...|        1|[[5332921.0,null,...|     0|2016-05-20 13:21:...|  news|\n|http://www.dl-onl...|     [210.0]|http://www.dl-onl...|While they might ...|A computer that c...|        1|[[5037779.0,null,...|     0|2016-05-20 15:41:...|  news|\n|             4172537|     [210.0]|http://3blmedia.c...|Teams Showcase Br...|Teams Showcase Br...|        1|[[null,369,San Fr...|     0|2016-04-20 13:03:...|  news|\n|             4184416|     [207.0]|http://www.virtua...|Accenture Teams w...|Accenture Teams w...|        1|[[null,106,United...|     0|2016-04-26 08:19:...|  news|\n|             4214099|     [210.0]|http://www.enterp...|IBM Launches 2nd ...|IBM Launches 2nd ...|        1|[[null,223,Maryla...|     0|2016-05-10 18:39:...|  news|\n|             4127474|     [210.0]|http://www.street...|Brokerage Firm Ra...|Brokerage Firm Ra...|        1|[[null,null,null,...|     0|2016-03-30 06:52:...|  news|\n|             4127863|     [208.0]|http://www.einnew...|TM Forum Appoints...|TM Forum Appoints...|        1|[[null,232,New Je...|     0|2016-03-30 09:24:...|  news|\n|             4128594|     [210.0]|http://www.destin...|Looker Joins Forc...|Looker Joins Forc...|        1|[[null,null,null,...|     0|2016-03-30 14:14:...|  news|\n|             4128596|     [207.0]|http://www.financ...|Accenture Plc (AC...|Accenture Plc (AC...|        1|[[null,204,Califo...|     0|2016-03-30 14:20:...|  news|\n|http://www.afr.co...|     [212.0]|http://www.afr.co...|\" Mr Sayers has b...|PwC boss Luke Say...|       -1|                  []|     5|2016-08-02 00:10:...|  news|\n+--------------------+------------+--------------------+--------------------+--------------------+---------+--------------------+------+--------------------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.write\n  .format(\"org.apache.spark.sql.cassandra\")\n  .mode(\"append\")\n  .options(Map( \"table\" -\u003e \"agg_table\", \"keyspace\" -\u003e \"testing\"))\n  .save()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20161004-035855_450847717",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.groupBy(\"source\").count().show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20160929-045051_799255669",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+-------+------+\n| source| count|\n+-------+------+\n|twitter|644853|\n|  forum|     1|\n| reddit|     1|\n|   news|  8873|\n+-------+------+\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"organization\", \"url\", \"description\", \"title\", \"sentiment\", \"place_lat\", \"place_lng\", \"cr\")\n  .filter(size($\"organization\")\u003e0 \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\")\n  .withColumn(\"source\", lit(\"news\"))\n  .withColumn(\"id\", rand())",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536467_-864875973",
+      "id": "20160929-045229_576285689",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: double, organization: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_lat: float, place_lng: float, cr: timestamp, source: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20160929-061604_1865779402",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+-------------------+------------+--------------------+--------------------+--------------------+---------+---------+---------+--------------------+------+\n|                 id|organization|                 url|         description|               title|sentiment|place_lat|place_lng|                  cr|source|\n+-------------------+------------+--------------------+--------------------+--------------------+---------+---------+---------+--------------------+------+\n| 0.5977292067910491|     [209.0]|http://finfeed.co...|Tech vision becom...|Tech vision becom...|        1|     null|     null|2016-04-01 01:00:...|  news|\n| 0.5185962438417865|     [210.0]|http://www.wsnews...|What Price Target...|What Price Target...|        1|     null|     null|2016-04-01 08:41:...|  news|\n| 0.8005940537982832|     [209.0]|https://www.sheph...|Jordan to acquire...|Jordan to acquire...|        0|     null|     null|2016-05-11 11:33:...|  news|\n| 0.6914037074881477|     [207.0]|http://www.thecou...|Accenture Plc (NY...|Accenture Plc (NY...|        1|     null|     null|2016-07-12 12:06:...|  news|\n| 0.6158404605072235|     [208.0]|http://www.pymnts...|CPOs\u0026#39; Support...|CPOs\u0027 Support For...|        1|     null|     null|2016-03-24 08:12:...|  news|\n| 0.9543545499647463|     [210.0]|http://www.bizjou...|From Whirlpool to...|From Whirlpool to...|        1|     null|     null|2016-04-20 15:30:...|  news|\n|0.28150328064100294|     [208.0]|http://www.freshb...|Better support fo...|Better support fo...|        1|     null|     null|2016-04-20 19:02:...|  news|\n| 0.3121778322589044|     [216.0]|http://promedmail...|Since 2012 (to da...|PRO/MENA\u003e MERS-Co...|       -1|     null|     null|2016-01-13 10:47:...|  news|\n| 0.2718139539016795|     [207.0]|https://www.finex...|Digital banking t...|Digital banking t...|        1|     null|     null|2016-05-05 06:19:...|  news|\n| 0.9068086209513624|     [210.0]|http://www.dl-onl...|While they might ...|A computer that c...|        1|     null|     null|2016-05-20 15:41:...|  news|\n| 0.7796435342302221|     [207.0]|http://www.invest...|Smart beta ETFs (...|Low Volatility ET...|        1|     null|     null|2016-05-21 03:21:...|  news|\n| 0.4767155758820273|     [208.0]|http://www.iottec...|High prices and s...|High prices and s...|        1|     null|     null|2016-07-21 07:19:...|  news|\n|0.36840862241068106|     [208.0]|https://www.globa...|Deloitte Advisory...|Deloitte Advisory...|        0|     null|     null|2016-07-21 03:55:...|  news|\n| 0.6110793316784224|     [210.0]|http://www.toptec...|Cisco Teams With ...|Cisco Teams With ...|        1|     null|     null|2016-07-01 12:01:...|  news|\n| 0.5482480896030992|     [210.0]|http://www.toptec...|CLOUD COMPUTING C...|CLOUD COMPUTING C...|        1|     null|     null|2016-07-01 12:01:...|  news|\n| 0.8179222969324251|     [210.0]|http://www.enterp...|IBM Joins Blockch...|IBM Joins Blockch...|        0|     null|     null|2016-07-01 13:03:...|  news|\n| 0.9611631505018478|     [216.0]|http://boletinald...|Con 71 muertes en...|La gripe A se ant...|       -1|     null|     null|2016-04-11 02:05:...|  news|\n|0.03645339308155038|     [210.0]|http://www.mysana...|Better Buy: Apple...|Better Buy: Apple...|       -1|     null|     null|2016-04-11 19:29:...|  news|\n|0.03831686944980561|     [210.0]|http://3blmedia.c...|Teams Showcase Br...|Teams Showcase Br...|        1|     null|     null|2016-04-20 13:03:...|  news|\n| 0.9805258496752571|     [207.0]|http://www.virtua...|Accenture Teams w...|Accenture Teams w...|        1|     null|     null|2016-04-26 08:19:...|  news|\n+-------------------+------------+--------------------+--------------------+--------------------+---------+---------+---------+--------------------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df.write\n  .format(\"org.apache.spark.sql.cassandra\")\n  .mode(\"append\")\n  .options(Map( \"table\" -\u003e \"agg_table\", \"keyspace\" -\u003e \"testing\"))\n  .save()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20160929-061624_21391453",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20161007-170537_1536266105",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+---------+------+\n|                  id|             disease|                 url|         description|               title|sentiment|          place_list|                  cr|impact|       ds|source|\n+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+---------+------+\n|             4133654|  [26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|     0|HealthMap|  news|\n|             4133778|           [26696.0]|http://www.plengl...|Bolivia Reports I...|Bolivia Reports I...|       -1|[[null,5,Bolivia,...|2016-04-01 16:43:...|     0|HealthMap|  news|\n|             4136989|  [26696.0, 25710.0]|http://www.bbc.co...|\u003ctable border\u003d\"0\"...|El brote de H1N1:...|       -1|[[null,6,Brazil,-...|2016-04-01 14:17:...|     0|HealthMap|  news|\n|             4216033|           [26696.0]|http://atarde.uol...|\u003ctable border\u003d\"0\"...|Pesquisa de brasi...|       -1|[[null,6,Brazil,-...|2016-05-11 16:00:...|     0|HealthMap|  news|\n|http://fortune.co...|           [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|     0|   scrapy|  news|\n|http://fortune.co...|           [26696.0]|http://fortune.co...|The new warnings ...|Zika Spreads to M...|       -1|[[2971316.0,null,...|2016-08-20 14:38:...|     0|   scrapy|  news|\n|             3925463|[25710.0, 26696.0...|http://boletinald...|La responsable de...|Identifican cómo ...|       -1|[[3177337.0,null,...|2016-01-11 01:06:...|  null|HealthMap|  news|\n|             4115666|           [26696.0]|http://www.eurasi...|Zika Virus And Mi...|Zika Virus And Mi...|       -1|[[null,6,Brazil,-...|2016-03-24 02:10:...|     0|HealthMap|  news|\n|             4115747|           [26696.0]|http://www.lanaci...|\u003ctable border\u003d\"0\"...|Dengue: estiman q...|       -1|[[null,4,Argentin...|2016-03-24 02:03:...|     0|HealthMap|  news|\n|             4171344|[25710.0, 26696.0...|http://boletinald...|¿Cómo es posible ...|Aclarando la intr...|       -1|[[3686120.0,null,...|2016-04-20 02:05:...|  null|HealthMap|  news|\n|http://www.review...|           [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|     5|   scrapy|  news|\n|http://www.review...|           [26696.0]|http://www.review...|Thirty have been ...|Cuba fighting Zik...|       -1|[[5509151.0,null,...|2016-09-02 16:55:...|     5|   scrapy|  news|\n|             4316891|           [26696.0]|http://news-russi...|\u003ctable border\u003d\"0\"...|Новая вакцина изл...|        1|[[2755476.0,null,...|2016-06-29 11:54:...|  null|HealthMap|  news|\n|             4204525|  [26696.0, 25520.0]|http://www.cdc.go...|      No description|Update: Ongoing Z...|       -1|[[null,192,Puerto...|2016-05-05 15:07:...|     0|HealthMap|  news|\n|             4205395|           [26696.0]|http://www.abc.co...|\u003ctable border\u003d\"0\"...|Suman 16 muertes ...|       -1|[[null,9,Paraguay...|2016-05-05 23:19:...|     0|HealthMap|  news|\n|             4209460|           [26696.0]|http://antiguaobs...|Health minister s...|Health minister s...|        1|[[null,30,Antigua...|2016-05-05 05:00:...|     0|HealthMap|  news|\n|             4361557|           [26696.0]|http://www.infoba...|\u003ctable border\u003d\"0\"...|Identificaron un ...|        0|[[3390760.0,null,...|2016-07-21 20:09:...|  null|HealthMap|  news|\n|             4361687|           [26696.0]|http://newsera.ru...|\u003ctable border\u003d\"0\"...|В Мексике резко в...|        1|                  []|2016-07-21 20:25:...|  null|HealthMap|  news|\n|http://www.laraza...|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|     0|   scrapy|  news|\n|http://www.laraza...|           [26696.0]|http://www.laraza...|Reconozca los sín...|Si viajas a Latin...|       -1|                  []|2016-03-01 14:20:...|  null|   scrapy|  news|\n+--------------------+--------------------+--------------------+--------------------+--------------------+---------+--------------------+--------------------+------+---------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "// NEW KEYSPACE\n\ndf.createCassandraTable(\"testing2\", \"agg_table\", \npartitionKeyColumns \u003d Some(Seq(\"ds\", \"ds\")), \nclusteringKeyColumns \u003d Some(Seq(\"cr\", \"id\"))\n)\n\n// df.write\n//   .format(\"org.apache.spark.sql.cassandra\")\n//   .mode(\"append\")\n//   .options(Map( \"table\" -\u003e \"agg_table2\", \"keyspace\" -\u003e \"testing\"))\n//   .save()",
+      "dateUpdated": "Oct 7, 2016 5:54:07 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20161007-170022_1658313036",
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "sc.cassandraTable(\"testing\", \"agg_table\").count()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20160929-061703_39149205",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "res35: Long \u003d 357894\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"product\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"impact\", \"cr\")\n  .withColumn(\"source\", lit(\"news\"))\n  \nvar df2 \u003d df.filter(array_contains(df(\"product\"), 1012))\n\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"twitter\", \"keyspace\" -\u003e \"processed_social\"))\n  .load()\n  .select(\"id\", \"product\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\")\n  .withColumn(\"source\", lit(\"twitter\"))\n  \ndf \u003d df.filter(array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)\n\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"reddit\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"product\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\")\n  .withColumn(\"source\", lit(\"reddit\"))\n  \ndf \u003d df.filter(array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)\nvar df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"reddit\", \"keyspace\" -\u003e \"processed_forum\"))\n  .load()\n  .select(\"id\", \"product\", \"url\", \"description\", \"title\", \"sentiment\", \"place_list\", \"cr\")\n  .withColumn(\"source\", lit(\"forum\"))\n  \ndf \u003ddf.filter(array_contains(df(\"product\"), 1012))\n\ndf2 \u003d df2.unionAll(df)",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "tableHide": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536468_-866799718",
+      "id": "20160929-062057_1049292680",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, product: array\u003cdouble\u003e, url: string, description: string, title: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, source: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-062831_1012694340",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+--------+--------------------+--------------------+--------------------+---------+----------+----+------+\n|                  id| product|                 url|         description|               title|sentiment|place_list|  cr|source|\n+--------------------+--------+--------------------+--------------------+--------------------+---------+----------+----+------+\n|http://www.azcent...|[1012.0]|http://www.azcent...|Certainly nothing...|Guess who will li...|       -1|        []|null|  news|\n+--------------------+--------+--------------------+--------------------+--------------------+---------+----------+----+------+\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"disease\", \"url\", \"description\", \"title\", \"dom\", \"sentiment\", \"place_list\", \"cr\")\n  .withColumn(\"dom2\", regexp_replace(lower($\"dom\"), \"\"\"https://|www.|http://|/\"\"\", \"\"))\n  .withColumn(\"source\", lit(\"news\"))\n  \nvar df2 \u003d df.filter(array_contains(df(\"disease\"), 26696) \u0026\u0026 $\"cr\" \u003e\u003d \"2016-01-01\").join(alexa, df(\"dom2\")\u003d\u003d\u003dalexa(\"url2\"), \"left\").na.fill(0,Seq(\"impact\"))",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-062849_890682541",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, dom: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, dom2: string, source: string]\ndf2: org.apache.spark.sql.DataFrame \u003d [id: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, dom: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, dom2: string, source: string, url2: string, impact: int]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df2.select( \"dom2\", \"dom\", \"url2\", \"impact\").filter($\"impact\"\u003e0).show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-200228_57613108",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+------------------+--------------------+------------------+------+\n|              dom2|                 dom|              url2|impact|\n+------------------+--------------------+------------------+------+\n|       latimes.com|         latimes.com|       latimes.com|     5|\n|    denverpost.com|http://www.denver...|    denverpost.com|     5|\n|      dnaindia.com|        dnaindia.com|      dnaindia.com|     5|\n|    nhregister.com|      nhregister.com|    nhregister.com|     3|\n|    nhregister.com|      nhregister.com|    nhregister.com|     3|\n|    nhregister.com|      nhregister.com|    nhregister.com|     3|\n|   sfchronicle.com|     sfchronicle.com|   sfchronicle.com|     5|\n|        nypost.com|  http://nypost.com/|        nypost.com|     5|\n|      dnaindia.com|        dnaindia.com|      dnaindia.com|     5|\n|       thehill.com|         thehill.com|       thehill.com|     5|\n|      examiner.com|        examiner.com|      examiner.com|     5|\n|  villagevoice.com|http://www.villag...|  villagevoice.com|     4|\n|dallasobserver.com|http://www.dallas...|dallasobserver.com|     4|\n|dallasobserver.com|http://www.dallas...|dallasobserver.com|     4|\n|    dallasnews.com|http://www.dallas...|    dallasnews.com|     5|\n|      dnaindia.com|        dnaindia.com|      dnaindia.com|     5|\n| indianexpress.com|   indianexpress.com| indianexpress.com|     5|\n|      metronews.ca|        metronews.ca|      metronews.ca|     4|\n|        rep-am.com|http://www.rep-am...|        rep-am.com|     2|\n|      triblive.com|        triblive.com|      triblive.com|     5|\n+------------------+--------------------+------------------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "alexa.show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-200243_314867536",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+--------------------+------+\n|                url2|impact|\n+--------------------+------+\n|         nytimes.com|     5|\n|timesofindia.indi...|     5|\n|        usatoday.com|     5|\n|             wsj.com|     5|\n|   indianexpress.com|     5|\n|economictimes.ind...|     5|\n|         latimes.com|     5|\n|          nypost.com|     5|\n|           chron.com|     5|\n|        thehindu.com|     5|\n|          sfgate.com|     5|\n|navbharattimes.in...|     5|\n|          eenadu.net|     5|\n|  chicagotribune.com|     5|\n|hollywoodreporter...|     5|\n|  hindustantimes.com|     5|\n|          smh.com.au|     5|\n|  manoramaonline.com|     5|\n|         thehill.com|     5|\n|    andhrajyothy.com|     5|\n+--------------------+------+\nonly showing top 20 rows\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"news2\", \"keyspace\" -\u003e \"test_news\"))\n  .load()\n  .select(\"id\", \"disease\", \"url\", \"description\", \"title\", \"dom\", \"sentiment\", \"place_list\", \"cr\", \"impact\")",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-200659_1178704637",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, disease: array\u003cdouble\u003e, url: string, description: string, title: string, dom: string, sentiment: int, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, cr: timestamp, impact: int]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df.select(\"impact\").show()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-202803_823094075",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+------+\n|impact|\n+------+\n+------+\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "var df \u003d sqlContext\n  .read\n  .format(\"org.apache.spark.sql.cassandra\")\n  .options(Map( \"table\" -\u003e \"agg_table\", \"keyspace\" -\u003e \"testing\"))\n  .load()\n  .cache()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536469_-867184467",
+      "id": "20160929-202817_2058785156",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "df: org.apache.spark.sql.DataFrame \u003d [id: string, cr: timestamp, description: string, impact: int, organization: array\u003cfloat\u003e, place_lat: float, place_list: array\u003cstruct\u003cgeo_geonameid:double,place_id:int,place_name:string,place_lat:float,place_lng:float\u003e\u003e, place_list_v: string, place_lng: float, sentiment: int, source: string, title: string, url: string]\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df.count()",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536470_-866030220",
+      "id": "20161004-173618_539472836",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "res6: Long \u003d 1662149\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "df.groupBy(to_date($\"cr\")).count().show(1000)",
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {
+        "enabled": true,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "editorMode": "ace/mode/scala",
+        "colWidth": 12.0
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536470_-866030220",
+      "id": "20161004-173637_558147716",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "+----------+-----+\n|todate(cr)|count|\n+----------+-----+\n|2016-01-31| 1172|\n|2016-08-18|   27|\n|2016-02-01| 2341|\n|2016-08-19| 1744|\n|2016-08-20| 6041|\n|2016-02-02| 2282|\n|2016-02-03| 2284|\n|2016-08-21| 6475|\n|2016-08-22|11433|\n|2016-02-04| 2174|\n|2016-08-23|13168|\n|2016-02-05| 2322|\n|2016-08-24|12549|\n|2016-02-06| 1265|\n|2016-08-25|14082|\n|2016-02-07|  859|\n|2016-08-26|12569|\n|2016-02-08| 2183|\n|2016-08-27| 7266|\n|2016-02-09| 2684|\n|2016-08-28| 6702|\n|2016-02-10| 2500|\n|2016-08-29|13627|\n|2016-02-11| 1988|\n|2016-08-30|15390|\n|2016-02-12| 2052|\n|2016-08-31|15723|\n|2016-02-13| 1049|\n|2016-09-01|20886|\n|2016-02-14|  839|\n|2016-09-02|15568|\n|2016-02-15| 1725|\n|2016-09-03| 8274|\n|2016-02-16| 3182|\n|2016-02-17| 2818|\n|2016-09-04| 8421|\n|2016-02-18| 2381|\n|2016-09-05|13371|\n|2016-09-06|20695|\n|2016-02-19| 2654|\n|2016-09-07|19946|\n|2016-02-20| 1698|\n|2016-09-08|20961|\n|2016-02-21| 1038|\n|2016-02-22| 2097|\n|2016-09-09|13292|\n|2016-09-10|10679|\n|2016-02-23| 2695|\n|2016-09-11| 9125|\n|2016-02-24| 2619|\n|2016-09-12|17155|\n|2016-02-25| 2552|\n|2016-02-26| 2285|\n|2016-09-13|14730|\n|2016-09-14|16122|\n|2016-02-27| 1560|\n|2016-09-15|15426|\n|2016-02-28| 1056|\n|2016-09-16|14715|\n|2016-02-29| 2375|\n|2016-09-17| 8994|\n|2016-03-01| 3201|\n|2016-03-02| 2975|\n|2016-09-18| 9043|\n|2016-09-19|17670|\n|2016-03-03| 3903|\n|2016-09-20|20697|\n|2016-03-04| 3659|\n|2016-09-21|17184|\n|2016-03-05| 1316|\n|2016-09-22|15946|\n|2016-03-06| 1283|\n|2016-09-23|16859|\n|2016-03-07| 2952|\n|2016-03-08| 4782|\n|2016-09-24| 9833|\n|2016-03-09| 2974|\n|2016-09-25| 8237|\n|2016-09-26|16581|\n|2016-03-10| 3097|\n|2016-03-11| 2018|\n|2016-09-27|19748|\n|2016-09-28|28778|\n|2016-03-12| 1292|\n|2016-09-29|30364|\n|2016-03-13| 1220|\n|2016-09-30|18336|\n|2016-03-14| 2135|\n|2016-10-01| 5570|\n|2016-03-15| 2516|\n|2016-03-16| 2944|\n|2016-10-02|   70|\n|2016-03-17| 2275|\n|2016-10-03|  150|\n|2016-03-18| 2235|\n|2016-03-19| 1487|\n|2016-03-20|  743|\n|2016-03-21| 1705|\n|2016-03-22| 1878|\n|2016-03-23| 2124|\n|2016-03-24| 2975|\n|2016-03-25| 1603|\n|2016-03-26| 1297|\n|2016-03-27|  819|\n|2016-03-28| 1899|\n|2016-03-29| 2072|\n|2016-03-30| 2393|\n|2016-03-31| 2199|\n|2016-04-01|16076|\n|2016-04-02| 9653|\n|2016-04-03| 8255|\n|2016-04-04|17599|\n|2016-04-05|20207|\n|2016-04-06|19321|\n|2016-04-07|24896|\n|2016-04-08|23277|\n|2016-04-09|10946|\n|2016-04-10| 8999|\n|2016-04-11|16607|\n|2016-04-12|24626|\n|2016-04-13|21399|\n|2016-04-14|20604|\n|2016-04-15|17055|\n|2016-04-16| 9850|\n|2016-04-17| 9242|\n|2016-04-18|22446|\n|2016-04-19|28713|\n|2016-04-20|17694|\n|2016-04-21|16741|\n|2016-04-22|15737|\n|2016-04-23|10696|\n|2016-04-24| 8940|\n|2016-04-25|17868|\n|2016-04-26|20387|\n|2016-04-27|21459|\n|2016-04-28|20457|\n|2016-04-29|21033|\n|2016-04-30|11745|\n|2016-05-01| 9867|\n|2016-05-02|20629|\n|2016-05-03|28321|\n|2016-05-04|29214|\n|2016-05-05|22641|\n|2016-05-06|18884|\n|2016-05-07| 9452|\n|2016-05-08|  791|\n|2016-05-09| 2477|\n|2016-05-10| 3001|\n|2016-05-11| 2868|\n|2016-05-12| 2357|\n|2016-05-13| 1938|\n|2016-05-14| 1053|\n|2016-05-15|  977|\n|2016-05-16| 2493|\n|2016-05-17| 3264|\n|2016-05-18| 2877|\n|2016-05-19| 2840|\n|2016-05-20| 2764|\n|2016-05-21| 1403|\n|2016-05-22|  942|\n|2016-05-23| 2251|\n|2016-05-24| 2359|\n|2016-05-25| 2847|\n|2016-05-26| 2381|\n|2016-05-27| 1991|\n|2016-05-28| 1248|\n|2016-05-29|  837|\n|2016-05-30| 1268|\n|2016-05-31| 2346|\n|2016-06-01| 2410|\n|2016-06-02| 2791|\n|2016-06-03| 2800|\n|2016-06-04| 6752|\n|2016-06-05| 6359|\n|2016-06-06|12484|\n|2016-06-07| 6701|\n|2016-06-08| 3101|\n|2016-06-09| 2542|\n|2016-06-10| 2904|\n|2016-06-11| 1384|\n|2016-06-12|  846|\n|2016-06-13| 1971|\n|2016-06-14| 2625|\n|2016-06-15| 3055|\n|2016-06-16| 2262|\n|2016-06-17| 8743|\n|2016-06-18| 8840|\n|2016-06-19| 7291|\n|2016-06-20|16278|\n|2016-06-21| 6666|\n|2016-06-22| 2422|\n|2016-06-23| 3130|\n|2016-06-24| 2383|\n|2016-06-25| 1272|\n|2016-06-26| 1003|\n|2016-06-27| 2359|\n|2016-06-28| 2732|\n|2016-06-29| 2708|\n|2016-06-30| 3218|\n|2016-07-01|   86|\n|2016-07-02|   20|\n|2016-07-03|   17|\n|2016-07-04|   58|\n|2016-07-05|  101|\n|2016-07-06|   89|\n|2016-07-07|   96|\n|2016-07-08|   88|\n|2016-07-09|   15|\n|2016-07-10|   33|\n|2016-07-11|  161|\n|2016-07-12|  179|\n|2016-07-13|  121|\n|2016-07-14|  130|\n|2016-07-15|  122|\n|2016-07-16|   27|\n|2016-07-17|   50|\n|2016-07-18|  163|\n|2016-07-19|  111|\n|2016-01-01|  726|\n|2016-01-02|  862|\n|2016-07-20|   94|\n|2016-01-03|  964|\n|2016-07-21|   98|\n|2016-01-04| 1826|\n|2016-07-22|   90|\n|2016-01-05| 2542|\n|2016-07-23|   29|\n|2016-01-06| 2549|\n|2016-07-24|   28|\n|2016-01-07| 2287|\n|2016-07-25|  136|\n|2016-07-26|  156|\n|2016-01-08| 2105|\n|2016-01-09| 1047|\n|2016-07-27|  141|\n|2016-01-10| 1561|\n|2016-07-28|  147|\n|2016-01-11| 2279|\n|2016-07-29|  127|\n|2016-01-12| 2372|\n|2016-07-30|   29|\n|2016-01-13| 2923|\n|2016-07-31|   46|\n|2016-01-14| 3765|\n|2016-08-01|  157|\n|2016-01-15| 2839|\n|2016-08-02|  194|\n|2016-01-16| 1508|\n|2016-08-03|  137|\n|2016-01-17| 1699|\n|2016-08-04|  125|\n|2016-01-18| 3172|\n|2016-08-05|   18|\n|2016-01-19| 3694|\n|2016-08-06|   25|\n|2016-01-20| 3994|\n|2016-08-07|    3|\n|2016-01-21| 7994|\n|2016-08-08|   12|\n|2016-01-22| 4244|\n|2016-08-09|   11|\n|2016-01-23| 1701|\n|2016-08-10|   18|\n|2016-01-24| 1292|\n|2016-08-11|   27|\n|2016-01-25| 2273|\n|2016-08-12|   26|\n|2016-01-26| 2698|\n|2016-08-13|    3|\n|2016-01-27| 2607|\n|2016-08-14|    3|\n|2016-01-28| 5253|\n|2016-08-15|    4|\n|2016-01-29| 2356|\n|2016-08-16|   23|\n|2016-01-30| 1369|\n|2016-08-17|   11|\n+----------+-----+\n\n"
+      },
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "dateUpdated": "Oct 7, 2016 5:48:56 PM",
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1475862536470_-866030220",
+      "id": "20161004-174016_1088744443",
+      "dateCreated": "Oct 7, 2016 5:48:56 PM",
+      "status": "READY",
+      "errorMessage": "",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "data for essam 3",
+  "id": "2C15FXPDU",
+  "angularObjects": {
+    "2BTJ3P41C:shared_process": [],
+    "2BUSJ5B5T:shared_process": [],
+    "2BUCYP1D2:shared_process": [],
+    "2BRYFEHJ7:shared_process": [],
+    "2BT211CDH:shared_process": [],
+    "2BTX1MQS6:shared_process": [],
+    "2BU87RU3U:shared_process": [],
+    "2BTB82RPQ:shared_process": [],
+    "2BRP3ZUWJ:shared_process": [],
+    "2BT3JK3T4:shared_process": [],
+    "2BUTB2HA6:shared_process": [],
+    "2BTXGDVEJ:shared_process": [],
+    "2BRZ896X6:shared_process": [],
+    "2BSSEDUXN:shared_process": [],
+    "2BSMJA8VG:shared_process": [],
+    "2BSJYK2YE:shared_process": [],
+    "2BUZX9EWW:shared_process": []
+  },
+  "config": {},
+  "info": {}
+}
